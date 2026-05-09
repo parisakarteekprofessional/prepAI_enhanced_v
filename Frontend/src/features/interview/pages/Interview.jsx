@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import '../style/interview.scss'
 import { useInterview } from '../hooks/useInterview.js'
-import { useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import AppHeader from '../components/AppHeader.jsx'
 
 
 
@@ -59,22 +60,60 @@ const RoadMapDay = ({ day }) => (
 // ── Main Component ────────────────────────────────────────────────────────────
 const Interview = () => {
     const [ activeNav, setActiveNav ] = useState('technical')
+    const [ loadFailed, setLoadFailed ] = useState(false)
+    const [ resumePreparing, setResumePreparing ] = useState(false)
     const { report, getReportById, loading, getResumePdf } = useInterview()
     const { interviewId } = useParams()
 
     useEffect(() => {
         if (interviewId) {
-            getReportById(interviewId)
+            setLoadFailed(false)
+            getReportById(interviewId).then((data) => {
+                if (!data) {
+                    setLoadFailed(true)
+                }
+            })
         }
     }, [ interviewId ])
 
 
 
-    if (loading || !report) {
+    const handleResumeDownload = async () => {
+        setResumePreparing(true)
+        try {
+            await getResumePdf(interviewId)
+        } finally {
+            setResumePreparing(false)
+        }
+    }
+
+    if (loading) {
         return (
-            <main className='loading-screen'>
-                <h1>Loading your interview plan...</h1>
-            </main>
+            <div className='interview-page'>
+                <AppHeader eyebrow='Report' title='Interview Plan' />
+                <main className='loading-screen loading-screen--panel'>
+                    <h1>{resumePreparing ? 'Preparing your resume...' : 'Loading your interview plan...'}</h1>
+                </main>
+            </div>
+        )
+    }
+
+    if (loadFailed || !report) {
+        return (
+            <div className='interview-page'>
+                <AppHeader eyebrow='Report' title='Interview Plan' />
+                <main className='empty-report'>
+                    <span className='empty-report__icon'>
+                        <svg width='28' height='28' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                            <path d='M12 8V12' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
+                            <path d='M12 16H12.01' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
+                            <path d='M10.3 4.3L2.9 17.2C2.1 18.6 3.1 20.3 4.7 20.3H19.3C20.9 20.3 21.9 18.6 21.1 17.2L13.7 4.3C12.9 2.9 11.1 2.9 10.3 4.3Z' stroke='currentColor' strokeWidth='2' strokeLinejoin='round' />
+                        </svg>
+                    </span>
+                    <h1>Interview plan not available</h1>
+                    <p>This report could not be loaded. Go back home, create a new plan, or log out from the top bar.</p>
+                </main>
+            </div>
         )
     }
 
@@ -85,11 +124,16 @@ const Interview = () => {
 
     return (
         <div className='interview-page'>
+            <AppHeader eyebrow='Report' title={report.title || 'Interview Plan'} />
             <div className='interview-layout'>
 
                 {/* ── Left Nav ── */}
                 <nav className='interview-nav'>
                     <div className="nav-content">
+                        <div className='interview-nav__summary'>
+                            <span>Plan</span>
+                            <strong>{report.title || 'Untitled role'}</strong>
+                        </div>
                         <p className='interview-nav__label'>Sections</p>
                         {NAV_ITEMS.map(item => (
                             <button
@@ -103,7 +147,7 @@ const Interview = () => {
                         ))}
                     </div>
                     <button
-                        onClick={() => { getResumePdf(interviewId) }}
+                        onClick={handleResumeDownload}
                         className='button primary-button' >
                         <svg height={"0.8rem"} style={{ marginRight: "0.8rem" }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.6144 17.7956 11.492 15.7854C12.2731 13.9966 13.6789 12.5726 15.4325 11.7942L17.8482 10.7219C18.6162 10.381 18.6162 9.26368 17.8482 8.92277L15.5079 7.88394C13.7092 7.08552 12.2782 5.60881 11.5105 3.75894L10.6215 1.61673C10.2916.821765 9.19319.821767 8.8633 1.61673L7.97427 3.75892C7.20657 5.60881 5.77553 7.08552 3.97685 7.88394L1.63658 8.92277C.868537 9.26368.868536 10.381 1.63658 10.7219L4.0523 11.7942C5.80589 12.5726 7.21171 13.9966 7.99275 15.7854L8.8704 17.7956C9.20776 18.5682 10.277 18.5682 10.6144 17.7956ZM19.4014 22.6899 19.6482 22.1242C20.0882 21.1156 20.8807 20.3125 21.8695 19.8732L22.6299 19.5353C23.0412 19.3526 23.0412 18.7549 22.6299 18.5722L21.9121 18.2532C20.8978 17.8026 20.0911 16.9698 19.6586 15.9269L19.4052 15.3156C19.2285 14.8896 18.6395 14.8896 18.4628 15.3156L18.2094 15.9269C17.777 16.9698 16.9703 17.8026 15.956 18.2532L15.2381 18.5722C14.8269 18.7549 14.8269 19.3526 15.2381 19.5353L15.9985 19.8732C16.9874 20.3125 17.7798 21.1156 18.2198 22.1242L18.4667 22.6899C18.6473 23.104 19.2207 23.104 19.4014 22.6899Z"></path></svg>
                         Download Resume

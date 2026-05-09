@@ -13,17 +13,19 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        await handleLogin({email,password})
-        navigate('/')
+        const success = await handleLogin({email,password})
+        if (success) {
+            navigate('/app')
+        }
     }
 
     if(loading){
-        return (<main><h1>Loading.......</h1></main>)
+        return (<main className='auth-page'><h1>Loading.......</h1></main>)
     }
 
 
     return (
-        <main>
+        <main className='auth-page'>
             <div className="form-container">
                 <h1>Login</h1>
                 <form onSubmit={handleSubmit}>

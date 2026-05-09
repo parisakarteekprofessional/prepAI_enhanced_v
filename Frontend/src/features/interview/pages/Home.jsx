@@ -2,20 +2,39 @@ import React, { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
+import AppHeader from '../components/AppHeader.jsx'
 
 const Home = () => {
 
     const { loading, generateReport,reports } = useInterview()
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
+    const [ resumeFileName, setResumeFileName ] = useState("")
+    const [ formError, setFormError ] = useState("")
     const resumeInputRef = useRef()
 
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
         const resumeFile = resumeInputRef.current.files[ 0 ]
+        setFormError("")
+
+        if (!jobDescription.trim()) {
+            setFormError("Please paste the target job description.")
+            return
+        }
+
+        if (!resumeFile) {
+            setFormError("Please upload a PDF resume.")
+            return
+        }
+
         const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
+        if (data?._id) {
+            navigate(`/interview/${data._id}`)
+        } else {
+            setFormError("Could not generate the interview plan. Please make sure you are logged in and try again.")
+        }
     }
 
     if (loading) {
@@ -28,11 +47,13 @@ const Home = () => {
 
     return (
         <div className='home-page'>
+            <AppHeader eyebrow='Workspace' title='Interview Planner' />
 
             {/* Page Header */}
             <header className='page-header'>
+                <span className='page-header__eyebrow'>AI interview command center</span>
                 <h1>Create Your Custom <span className='highlight'>Interview Plan</span></h1>
-                <p>Let our AI analyze the job requirements and your unique profile to build a winning strategy.</p>
+                <p>Analyze the role, map your strengths, and turn your resume into a focused interview strategy.</p>
             </header>
 
             {/* Main Card */}
@@ -79,9 +100,17 @@ const Home = () => {
                                 <span className='dropzone__icon'>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
                                 </span>
-                                <p className='dropzone__title'>Click to upload or drag &amp; drop</p>
-                                <p className='dropzone__subtitle'>PDF or DOCX (Max 5MB)</p>
-                                <input ref={resumeInputRef} hidden type='file' id='resume' name='resume' accept='.pdf,.docx' />
+                                <p className='dropzone__title'>{resumeFileName || "Click to upload"}</p>
+                                <p className='dropzone__subtitle'>PDF only (Max 3MB)</p>
+                                <input
+                                    ref={resumeInputRef}
+                                    hidden
+                                    type='file'
+                                    id='resume'
+                                    name='resume'
+                                    accept='application/pdf,.pdf'
+                                    onChange={(e) => setResumeFileName(e.target.files[ 0 ]?.name || "")}
+                                />
                             </label>
                         </div>
 
@@ -113,6 +142,7 @@ const Home = () => {
                 {/* Card Footer */}
                 <div className='interview-card__footer'>
                     <span className='footer-info'>AI-Powered Strategy Generation &bull; Approx 30s</span>
+                    {formError && <span className='footer-error'>{formError}</span>}
                     <button
                         onClick={handleGenerateReport}
                         className='generate-btn'>

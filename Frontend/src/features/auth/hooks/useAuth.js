@@ -15,8 +15,10 @@ export const useAuth = () => {
         try {
             const data = await login({ email, password })
             setUser(data.user)
+            return true
         } catch (err) {
-
+            setUser(null)
+            return false
         } finally {
             setLoading(false)
         }
@@ -27,8 +29,10 @@ export const useAuth = () => {
         try {
             const data = await register({ username, email, password })
             setUser(data.user)
+            return true
         } catch (err) {
-
+            setUser(null)
+            return false
         } finally {
             setLoading(false)
         }
@@ -52,7 +56,7 @@ export const useAuth = () => {
             try {
 
                 const data = await getMe()
-                setUser(data.user)
+                setUser(data?.user || null)
             } catch (err) { } finally {
                 setLoading(false)
             }

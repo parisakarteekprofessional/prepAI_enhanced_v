@@ -7,6 +7,8 @@ $border-color:   #2a3348;
 $text-primary:   #e6edf3;
 $text-muted:     #7d8590;
 $accent:         #ff2d78;
+$accent-dark:    #d71660;
+$accent-blue:    #54c6ff;
 $accent-alt:     #ff6b9d;
 $badge-required: #ff2d78;
 $badge-best:     #ff2d78;
@@ -18,25 +20,43 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
 .home-page {
     width: 100%;
     min-height: 100vh;
-    background-color: $bg-page;
+    background: linear-gradient(180deg, #111827 0%, $bg-page 48%, #090c12 100%);
     color: $text-primary;
     font-family: $font-stack;
 
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 3rem 1.5rem;
-    gap: 2rem;
+    justify-content: flex-start;
+    padding: 0.75rem;
+    gap: 1.5rem;
 }
 
 // ── Page Header ──────────────────────────────────────────────────────────────
 .page-header {
     text-align: center;
+    width: 100%;
+    max-width: 1480px;
+    margin-top: 0.5rem;
+    padding: 0 1rem;
+
+    &__eyebrow {
+        display: inline-flex;
+        margin-bottom: 0.7rem;
+        padding: 0.32rem 0.65rem;
+        color: #b8ecff;
+        background: rgba($accent-blue, 0.1);
+        border: 1px solid rgba($accent-blue, 0.22);
+        border-radius: 0.5rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
 
     h1 {
-        font-size: 2.25rem;
-        font-weight: 700;
+        font-size: 2.45rem;
+        font-weight: 850;
         margin-bottom: 0.5rem;
         color: $text-primary;
     }
@@ -50,18 +70,19 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     }
 
     .highlight {
-        color: $accent;
+        color: #ff70a8;
     }
 }
 
 // ── Main Card ─────────────────────────────────────────────────────────────────
 .interview-card {
     width: 100%;
-    max-width: 900px;
-    background-color: $bg-card;
-    border: 1px solid $border-color;
-    border-radius: 1rem;
+    max-width: 1480px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012)), $bg-card;
+    border: 1px solid rgba($border-color, 0.95);
+    border-radius: 0.75rem;
     overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
 
     &__body {
         display: flex;
@@ -72,12 +93,20 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 1rem;
         padding: 1rem 1.5rem;
         border-top: 1px solid $border-color;
 
         .footer-info {
             font-size: 0.8rem;
             color: $text-muted;
+        }
+
+        .footer-error {
+            flex: 1;
+            font-size: 0.8rem;
+            color: #ff8a8a;
+            text-align: right;
         }
     }
 }
@@ -167,7 +196,7 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     font-size: 0.7rem;
     font-weight: 600;
     padding: 0.15rem 0.5rem;
-    border-radius: 0.3rem;
+        border-radius: 0.35rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
 
@@ -211,11 +240,12 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     padding: 1.5rem 1rem;
     background-color: $bg-input;
     border: 2px dashed $border-color;
-    border-radius: 0.6rem;
+    border-radius: 0.5rem;
     cursor: pointer;
-    transition: border-color 0.2s, background-color 0.2s;
+    transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
 
     &:hover {
+        transform: translateY(-1px);
         border-color: $accent;
         background-color: rgba($accent, 0.05);
     }
@@ -301,7 +331,7 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, $accent 0%, darken($accent, 10%) 100%);
+    background: linear-gradient(135deg, $accent 0%, $accent-dark 100%);
     color: #fff;
     font-size: 0.9rem;
     font-weight: 600;
@@ -325,7 +355,8 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     flex-direction: column;
     gap: 0.75rem;
     width: 100%;
-    max-width: 900px;
+    max-width: 1480px;
+    padding: 0;
 
     .reports-list{
         display: flex;
@@ -369,5 +400,67 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
         &:hover {
             color: $text-primary;
         }
+    }
+}
+
+@media (max-width: 860px) {
+    .home-page {
+        padding: 0.75rem;
+    }
+
+    .page-header {
+        h1 {
+            font-size: 2rem;
+        }
+    }
+
+    .interview-card {
+        &__body {
+            flex-direction: column;
+        }
+
+        &__footer {
+            align-items: stretch;
+            flex-direction: column;
+
+            .footer-error {
+                text-align: left;
+            }
+        }
+    }
+
+    .panel-divider {
+        width: 100%;
+        height: 1px;
+    }
+
+    .panel--left .char-counter {
+        position: static;
+        align-self: flex-end;
+    }
+
+    .generate-btn {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+@media (min-width: 900px) {
+    .home-page {
+        padding: 1rem 2.5rem 3rem;
+        gap: 2rem;
+    }
+
+    .interview-card {
+        &__body {
+            min-height: 560px;
+        }
+    }
+}
+
+@media (min-width: 1280px) {
+    .home-page {
+        padding-left: 4rem;
+        padding-right: 4rem;
     }
 }
