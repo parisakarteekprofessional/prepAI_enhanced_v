@@ -14,6 +14,11 @@ app.get(/^\/(?!api(?:\/|$)).*/, (req, res) => {
 })
 
 
+const { ensureRagEngineRunning } = require("./src/services/study/pythonRunner")
+
 app.listen(3000, () => {
     console.log("Server is running on port 3000")
+    ensureRagEngineRunning().catch((err) => {
+        console.warn("[Server] RAG Engine warm-up notice:", err.message)
+    })
 })

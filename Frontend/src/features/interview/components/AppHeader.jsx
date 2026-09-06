@@ -10,6 +10,7 @@ const AppHeader = ({ eyebrow = 'Interview AI', title = 'PrepAI' }) => {
 
     const isDsaActive = location.pathname.startsWith('/dsa')
     const isPlannerActive = location.pathname.startsWith('/app') || location.pathname.startsWith('/interview')
+    const isStudyActive = location.pathname.startsWith('/study')
 
     const onLogout = async () => {
         navigate('/', { replace: true })
@@ -52,6 +53,17 @@ const AppHeader = ({ eyebrow = 'Interview AI', title = 'PrepAI' }) => {
                             <polyline points='8 6 2 12 8 18' />
                         </svg>
                         <span>DSA Practice</span>
+                    </Link>
+
+                    <Link
+                        className={`app-header__nav-item ${isStudyActive ? 'is-active' : ''}`}
+                        to='/study'
+                    >
+                        <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                            <path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20' />
+                            <path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z' />
+                        </svg>
+                        <span>AI Study Room</span>
                     </Link>
                 </nav>
             </div>
