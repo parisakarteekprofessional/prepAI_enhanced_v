@@ -23,7 +23,8 @@ async function generateInterViewReportController(req, res) {
         user: req.user.id,
         resume: resumeContent.text,
         selfDescription,
-        jobDescription,
+        status: "COMPLETED",
+        eligibleForLiveInterview: true,
         ...interViewReportByAi
     })
 

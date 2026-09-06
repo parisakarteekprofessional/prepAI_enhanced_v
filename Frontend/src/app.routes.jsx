@@ -19,6 +19,12 @@ import Problem from "./features/dsa/pages/Problem"
 import StudyHome from "./features/study/pages/StudyHome"
 import StudyRoom from "./features/study/pages/StudyRoom"
 
+// AI Mock Interview pages
+import MockInterviewHome from "./features/mockInterview/pages/MockInterviewHome"
+import MockInterviewSetup from "./features/mockInterview/pages/MockInterviewSetup"
+import MockInterviewRoom from "./features/mockInterview/pages/MockInterviewRoom"
+import MockInterviewReport from "./features/mockInterview/pages/MockInterviewReport"
+
 export const router = createBrowserRouter([
     {
         path: "/login",
@@ -100,9 +106,38 @@ export const router = createBrowserRouter([
         errorElement: <RouteErrorBoundary />
     },
 
+    // AI Mock Interview Routes (Accessed exclusively through Interview Report)
+    {
+        path: "/mock-interview",
+        element: <Navigate to="/app" replace />
+    },
+    {
+        path: "/mock-interview/setup",
+        element: <Navigate to="/app" replace />
+    },
+    {
+        path: "/mock-interview/live",
+        element: <Protected><MockInterviewRoom /></Protected>,
+        errorElement: <RouteErrorBoundary />
+    },
+    {
+        path: "/mock-interview/live/:reportId",
+        element: <Protected><MockInterviewRoom /></Protected>,
+        errorElement: <RouteErrorBoundary />
+    },
+    {
+        path: "/mock-interview/:sessionId",
+        element: <Protected><MockInterviewRoom /></Protected>,
+        errorElement: <RouteErrorBoundary />
+    },
+    {
+        path: "/mock-interview/:sessionId/report",
+        element: <Navigate to="/app" replace />
+    },
+
     // Catch-all Wildcard Route
     {
         path: "*",
-        element: <Navigate to="/study" replace />
+        element: <Navigate to="/app" replace />
     }
 ])

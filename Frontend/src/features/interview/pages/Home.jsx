@@ -247,7 +247,22 @@ const Home = () => {
                                     <p className={`match-score ${report.matchScore >= 80 ? 'score--high' : report.matchScore >= 60 ? 'score--mid' : 'score--low'}`}>
                                         Match Score: {report.matchScore}%
                                     </p>
-                                    <span className='report-item__view-hint'>View Plan →</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        {report.liveInterviewResult && (
+                                            <span style={{
+                                                background: 'rgba(52, 211, 153, 0.15)',
+                                                border: '1px solid rgba(52, 211, 153, 0.3)',
+                                                color: '#34d399',
+                                                borderRadius: '6px',
+                                                padding: '0.2rem 0.5rem',
+                                                fontSize: '0.72rem',
+                                                fontWeight: 700
+                                            }}>
+                                                AI Score: {report.liveInterviewResult.overallScore || report.liveInterviewResult.scores?.overall}%
+                                            </span>
+                                        )}
+                                        <span className='report-item__view-hint'>View Plan →</span>
+                                    </div>
                                 </div>
                             </li>
                         ))}

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import '../style/interview.scss'
 import { useInterview } from '../hooks/useInterview.js'
-import { useParams } from 'react-router'
+import { useParams, useSearchParams, Link } from 'react-router'
 import AppHeader from '../components/AppHeader.jsx'
-
-
+import MockReportsSection from '../components/MockReportsSection.jsx'
+import { getInterviewHistory } from '../../mockInterview/services/mockInterview.api.js'
 
 const NAV_ITEMS = [
+    { id: 'live-interview', label: 'AI Interview Score', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg>) },
+    { id: 'mock-reports', label: 'AI Mock Reports', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>) },
     { id: 'technical', label: 'Technical Questions', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>) },
     { id: 'behavioral', label: 'Behavioral Questions', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>) },
     { id: 'roadmap', label: 'Road Map', icon: (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>) },
@@ -59,24 +61,37 @@ const RoadMapDay = ({ day }) => (
 
 // ── Main Component ────────────────────────────────────────────────────────────
 const Interview = () => {
-    const [ activeNav, setActiveNav ] = useState('technical')
+    const { interviewId } = useParams()
+    const [ searchParams ] = useSearchParams()
+    const initialNav = searchParams.get('tab') === 'live-interview' ? 'live-interview' : searchParams.get('tab') === 'mock-reports' ? 'mock-reports' : 'technical'
+
+    const [ activeNav, setActiveNav ] = useState(initialNav)
     const [ loadFailed, setLoadFailed ] = useState(false)
     const [ resumePreparing, setResumePreparing ] = useState(false)
+    const [ mockHistory, setMockHistory ] = useState([])
+    const [ loadingMockHistory, setLoadingMockHistory ] = useState(false)
     const { report, getReportById, loading, getResumePdf } = useInterview()
-    const { interviewId } = useParams()
 
     useEffect(() => {
         if (interviewId) {
             setLoadFailed(false)
+            setLoadingMockHistory(true)
+            getInterviewHistory(interviewId)
+                .then((res) => {
+                    if (res?.sessions) setMockHistory(res.sessions)
+                })
+                .catch((e) => console.error('Failed to fetch mock history:', e))
+                .finally(() => setLoadingMockHistory(false))
+
             getReportById(interviewId).then((data) => {
                 if (!data) {
                     setLoadFailed(true)
+                } else if (searchParams.get('tab') === 'live-interview' || searchParams.get('completed') === 'true') {
+                    setActiveNav('live-interview')
                 }
             })
         }
-    }, [ interviewId ])
-
-
+    }, [ interviewId, searchParams ])
 
     const handleResumeDownload = async () => {
         setResumePreparing(true)
@@ -121,6 +136,8 @@ const Interview = () => {
         report.matchScore >= 80 ? 'score--high' :
             report.matchScore >= 60 ? 'score--mid' : 'score--low'
 
+    const liveResult = report.liveInterviewResult
+    const liveScores = liveResult?.scores || {}
 
     return (
         <div className='interview-page'>
@@ -143,9 +160,36 @@ const Interview = () => {
                             >
                                 <span className='interview-nav__icon'>{item.icon}</span>
                                 {item.label}
+                                {item.id === 'live-interview' && liveResult && (
+                                    <span style={{
+                                        marginLeft: 'auto',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 700,
+                                        background: 'rgba(52, 211, 153, 0.2)',
+                                        color: '#34d399',
+                                        padding: '0.1rem 0.4rem',
+                                        borderRadius: '4px'
+                                    }}>
+                                        {liveResult.overallScore}%
+                                    </span>
+                                )}
+                                {item.id === 'mock-reports' && mockHistory.length > 0 && (
+                                    <span style={{
+                                        marginLeft: 'auto',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 700,
+                                        background: 'rgba(236, 72, 153, 0.2)',
+                                        color: '#f472b6',
+                                        padding: '0.1rem 0.45rem',
+                                        borderRadius: '4px'
+                                    }}>
+                                        {mockHistory.length}
+                                    </span>
+                                )}
                             </button>
                         ))}
                     </div>
+
                     <button
                         onClick={handleResumeDownload}
                         className='button primary-button' >
@@ -158,6 +202,253 @@ const Interview = () => {
 
                 {/* ── Center Content ── */}
                 <main className='interview-content'>
+                    {/* Section 0: AI Mock Reports & History */}
+                    {activeNav === 'mock-reports' && (
+                        <section>
+                            <MockReportsSection
+                                sessions={mockHistory}
+                                loading={loadingMockHistory}
+                                interviewId={interviewId}
+                                reportTitle={report.title}
+                                onSelectActiveReport={() => setActiveNav('live-interview')}
+                            />
+                        </section>
+                    )}
+
+                    {/* Section 1: Live AI Interview Score & Debrief */}
+                    {activeNav === 'live-interview' && (
+                        <section>
+                            <div className='content-header' style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                                    <h2>Live AI Interview Score</h2>
+                                    {liveResult && (
+                                        <span className='content-header__count'>
+                                            Conducted on {new Date(liveResult.completedAt).toLocaleDateString()}
+                                        </span>
+                                    )}
+                                </div>
+                                {mockHistory.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveNav('mock-reports')}
+                                        style={{
+                                            background: 'rgba(236, 72, 153, 0.12)',
+                                            border: '1px solid rgba(236, 72, 153, 0.3)',
+                                            borderRadius: '8px',
+                                            padding: '0.4rem 0.85rem',
+                                            color: '#f472b6',
+                                            fontSize: '0.78rem',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '0.45rem',
+                                            transition: 'all 0.2s ease'
+                                        }}
+                                    >
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
+                                        View All Mock Reports ({mockHistory.length}) →
+                                    </button>
+                                )}
+                            </div>
+
+                            {liveResult ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    {/* Overall Score Dial Card */}
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'auto 1fr auto',
+                                        alignItems: 'center',
+                                        gap: '2rem',
+                                        background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        borderRadius: '16px',
+                                        padding: '1.75rem'
+                                    }}>
+                                        <div style={{
+                                            width: '90px',
+                                            height: '90px',
+                                            borderRadius: '50%',
+                                            border: '4px solid #ec4899',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            background: 'rgba(236, 72, 153, 0.12)'
+                                        }}>
+                                            <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f8fafc' }}>
+                                                {liveResult.overallScore}%
+                                            </span>
+                                            <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: '#94a3b8', fontWeight: 600 }}>
+                                                Score
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <span style={{
+                                                display: 'inline-block',
+                                                padding: '0.25rem 0.75rem',
+                                                borderRadius: '999px',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 700,
+                                                background: 'rgba(52, 211, 153, 0.2)',
+                                                color: '#34d399',
+                                                marginBottom: '0.5rem'
+                                            }}>
+                                                {liveScores.hiringRecommendation?.replace(/_/g, ' ') || 'COMPLETED'}
+                                            </span>
+                                            <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.3rem', color: '#f8fafc' }}>
+                                                {report.title} Live Simulation
+                                            </h3>
+                                            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.85rem' }}>
+                                                Questions sourced directly from this plan and your solved DSA history. Untimed candidate evaluation.
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <Link
+                                                to={`/mock-interview/live?reportId=${interviewId}`}
+                                                className='button primary-button'
+                                                style={{ textDecoration: 'none', display: 'inline-flex', padding: '0.7rem 1.25rem', fontSize: '0.85rem' }}
+                                            >
+                                                Retake Live Interview
+                                            </Link>
+                                        </div>
+                                    </div>
+
+                                    {/* 5-Category Breakdown Grid */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                                        <div style={{ background: 'rgba(18, 24, 38, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '1rem' }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Technical Knowledge</span>
+                                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#38bdf8', margin: '0.25rem 0' }}>
+                                                {liveScores.technical ?? 75}%
+                                            </div>
+                                            <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                <div style={{ width: `${liveScores.technical ?? 75}%`, height: '100%', background: '#38bdf8' }} />
+                                            </div>
+                                        </div>
+
+                                        <div style={{ background: 'rgba(18, 24, 38, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '1rem' }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>DSA & Algorithms</span>
+                                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#ec4899', margin: '0.25rem 0' }}>
+                                                {liveScores.dsa ?? 75}%
+                                            </div>
+                                            <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                <div style={{ width: `${liveScores.dsa ?? 75}%`, height: '100%', background: '#ec4899' }} />
+                                            </div>
+                                        </div>
+
+                                        <div style={{ background: 'rgba(18, 24, 38, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '1rem' }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Problem Solving</span>
+                                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#a855f7', margin: '0.25rem 0' }}>
+                                                {liveScores.problemSolving ?? 75}%
+                                            </div>
+                                            <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                <div style={{ width: `${liveScores.problemSolving ?? 75}%`, height: '100%', background: '#a855f7' }} />
+                                            </div>
+                                        </div>
+
+                                        <div style={{ background: 'rgba(18, 24, 38, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '1rem' }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Communication</span>
+                                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#34d399', margin: '0.25rem 0' }}>
+                                                {liveScores.communication ?? 75}%
+                                            </div>
+                                            <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                <div style={{ width: `${liveScores.communication ?? 75}%`, height: '100%', background: '#34d399' }} />
+                                            </div>
+                                        </div>
+
+                                        <div style={{ background: 'rgba(18, 24, 38, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '1rem' }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Behavioral</span>
+                                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f59e0b', margin: '0.25rem 0' }}>
+                                                {liveScores.behavioral ?? 75}%
+                                            </div>
+                                            <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                <div style={{ width: `${liveScores.behavioral ?? 75}%`, height: '100%', background: '#f59e0b' }} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Executive Summary & Feedback */}
+                                    {liveResult.summary && (
+                                        <div style={{ background: 'rgba(18, 24, 38, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '14px', padding: '1.5rem' }}>
+                                            <h3 style={{ margin: '0 0 0.75rem', fontSize: '1.1rem', color: '#f8fafc' }}>
+                                                Executive Debrief Summary
+                                            </h3>
+                                            <p style={{ margin: '0 0 1.25rem', color: '#cbd5e1', lineHeight: 1.6, fontSize: '0.92rem' }}>
+                                                {liveResult.summary}
+                                            </p>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+                                                {liveResult.strengths?.length > 0 && (
+                                                    <div>
+                                                        <h4 style={{ margin: '0 0 0.5rem', color: '#34d399', fontSize: '0.88rem', fontWeight: 700 }}>
+                                                            ✓ Key Strengths
+                                                        </h4>
+                                                        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#94a3b8', fontSize: '0.85rem' }}>
+                                                            {liveResult.strengths.map((s, i) => (
+                                                                <li key={i} style={{ marginBottom: '0.3rem' }}>{s}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+
+                                                {liveResult.weaknesses?.length > 0 && (
+                                                    <div>
+                                                        <h4 style={{ margin: '0 0 0.5rem', color: '#f87171', fontSize: '0.88rem', fontWeight: 700 }}>
+                                                            ⚠ Blind Spots & Improvements
+                                                        </h4>
+                                                        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#94a3b8', fontSize: '0.85rem' }}>
+                                                            {liveResult.weaknesses.map((w, i) => (
+                                                                <li key={i} style={{ marginBottom: '0.3rem' }}>{w}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div style={{
+                                    background: 'rgba(18, 24, 38, 0.7)',
+                                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                                    borderRadius: '16px',
+                                    padding: '3rem 2rem',
+                                    textAlign: 'center'
+                                }}>
+                                    <div style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        borderRadius: '50%',
+                                        background: 'rgba(236, 72, 153, 0.15)',
+                                        color: '#f472b6',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        margin: '0 auto 1.25rem'
+                                    }}>
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg>
+                                    </div>
+                                    <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', color: '#f8fafc' }}>
+                                        No Live AI Interview Taken Yet
+                                    </h3>
+                                    <p style={{ maxWidth: '520px', margin: '0 auto 1.5rem', color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                                        Practice answering the exact technical & behavioral questions generated in this report, along with problems from your solved DSA history, in a live untimed simulation.
+                                    </p>
+                                    <Link
+                                        to={`/mock-interview/live?reportId=${interviewId}`}
+                                        className='button primary-button'
+                                        style={{ textDecoration: 'none', display: 'inline-flex', padding: '0.75rem 1.5rem' }}
+                                    >
+                                        Take Live AI Interview →
+                                    </Link>
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {/* Section 2: Technical Questions */}
                     {activeNav === 'technical' && (
                         <section>
                             <div className='content-header'>
@@ -172,6 +463,7 @@ const Interview = () => {
                         </section>
                     )}
 
+                    {/* Section 3: Behavioral Questions */}
                     {activeNav === 'behavioral' && (
                         <section>
                             <div className='content-header'>
@@ -186,6 +478,7 @@ const Interview = () => {
                         </section>
                     )}
 
+                    {/* Section 4: Preparation Road Map */}
                     {activeNav === 'roadmap' && (
                         <section>
                             <div className='content-header'>
@@ -213,7 +506,7 @@ const Interview = () => {
                             <span className='match-score__value'>{report.matchScore}</span>
                             <span className='match-score__pct'>%</span>
                         </div>
-                        <p className='match-score__sub'>Strong match for this role</p>
+                        <p className='match-score__sub'>Role match for your resume</p>
                     </div>
 
                     <div className='sidebar-divider' />
@@ -228,6 +521,155 @@ const Interview = () => {
                                 </span>
                             ))}
                         </div>
+                    </div>
+
+                    <div className='sidebar-divider' />
+
+                    {/* Live AI Interview Score Card or Launch CTA */}
+                    {liveResult ? (
+                        <div className='mock-interview-score-card' style={{
+                            background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.12) 0%, rgba(59, 130, 246, 0.12) 100%)',
+                            border: '1px solid rgba(52, 211, 153, 0.35)',
+                            borderRadius: '12px',
+                            padding: '1.25rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.75rem',
+                            textAlign: 'center'
+                        }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Live AI Interview Score
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <span style={{ fontSize: '2.2rem', fontWeight: 800, color: '#f8fafc' }}>
+                                    {liveResult.overallScore}%
+                                </span>
+                            </div>
+                            <span style={{
+                                display: 'inline-block',
+                                padding: '0.2rem 0.6rem',
+                                borderRadius: '999px',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                background: 'rgba(52, 211, 153, 0.2)',
+                                color: '#34d399',
+                                margin: '0 auto'
+                            }}>
+                                {liveScores.hiringRecommendation?.replace(/_/g, ' ') || 'COMPLETED'}
+                            </span>
+                            <button
+                                type='button'
+                                onClick={() => setActiveNav('live-interview')}
+                                className='button'
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                                    color: '#e2e8f0',
+                                    fontSize: '0.78rem',
+                                    padding: '0.5rem',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                View Score Breakdown →
+                            </button>
+                            <Link
+                                to={`/mock-interview/live?reportId=${interviewId}`}
+                                className='button primary-button'
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.6rem 1rem',
+                                    fontSize: '0.8rem',
+                                    textDecoration: 'none',
+                                    fontWeight: 700
+                                }}
+                            >
+                                Retake Live Interview
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className='mock-interview-cta' style={{
+                            background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(59, 130, 246, 0.12) 100%)',
+                            border: '1px solid rgba(236, 72, 153, 0.3)',
+                            borderRadius: '12px',
+                            padding: '1.25rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.75rem',
+                            textAlign: 'center'
+                        }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#f472b6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Face-to-Face Simulation
+                            </span>
+                            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+                                Ready for a live simulation?
+                            </h4>
+                            <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                                Practice these exact technical & behavioral questions plus questions from your solved DSA list untimed.
+                            </p>
+                            <Link
+                                to={`/mock-interview/live?reportId=${interviewId}`}
+                                className='button primary-button'
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.7rem 1rem',
+                                    fontSize: '0.85rem',
+                                    textDecoration: 'none',
+                                    fontWeight: 700,
+                                    letterSpacing: '0.03em'
+                                }}
+                            >
+                                <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><polygon points='23 7 16 12 23 17 23 7' /><rect x='1' y='5' width='15' height='14' rx='2' ry='2' /></svg>
+                                TAKE LIVE AI INTERVIEW
+                            </Link>
+                        </div>
+                    )}
+
+                    <div className='sidebar-divider' />
+
+                    {/* Bridges */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Preparation Hub
+                        </span>
+                        <Link
+                            to='/dsa'
+                            className='button'
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: '#e2e8f0',
+                                fontSize: '0.8rem',
+                                padding: '0.5rem 0.75rem',
+                                textAlign: 'center',
+                                textDecoration: 'none',
+                                borderRadius: '8px'
+                            }}
+                        >
+                            Practice Weak DSA Topics →
+                        </Link>
+                        <Link
+                            to='/study'
+                            className='button'
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: '#e2e8f0',
+                                fontSize: '0.8rem',
+                                padding: '0.5rem 0.75rem',
+                                textAlign: 'center',
+                                textDecoration: 'none',
+                                borderRadius: '8px'
+                            }}
+                        >
+                            Study Weak Concepts →
+                        </Link>
                     </div>
 
                 </aside>

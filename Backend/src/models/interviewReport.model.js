@@ -91,6 +91,42 @@ const interviewReportSchema = new mongoose.Schema({
     title: {
         type: String,
         required: [ true, "Job title is required" ]
+    },
+    status: {
+        type: String,
+        enum: [ "GENERATING", "COMPLETED", "FAILED" ],
+        default: "COMPLETED"
+    },
+    eligibleForLiveInterview: {
+        type: Boolean,
+        default: true
+    },
+    liveInterviewResult: {
+        sessionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "MockInterviewSession"
+        },
+        overallScore: { type: Number, min: 0, max: 100 },
+        scores: {
+            overall: Number,
+            technical: Number,
+            behavioral: Number,
+            dsa: Number,
+            problemSolving: Number,
+            communication: Number,
+            hiringRecommendation: String
+        },
+        summary: String,
+        strengths: [ String ],
+        weaknesses: [ String ],
+        actionableSteps: [ {
+            label: String,
+            link: String,
+            type: { type: String }
+        } ],
+        completedAt: { type: Date, default: Date.now },
+        totalQuestionsAnswered: Number,
+        totalTimeSpentSeconds: Number
     }
 }, {
     timestamps: true

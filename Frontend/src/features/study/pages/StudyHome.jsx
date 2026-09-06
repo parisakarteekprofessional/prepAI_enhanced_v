@@ -6,29 +6,6 @@ import UploadModal from '../components/UploadModal'
 import { useStudy } from '../hooks/useStudy'
 import '../style/study.scss'
 
-const QUICK_ACTIONS = [
-    {
-        title: 'Summarize key concepts',
-        icon: '📝',
-        prompt: 'Summarize the core concepts and main takeaways in this document clearly with bullet points.'
-    },
-    {
-        title: 'Explain core principles',
-        icon: '💡',
-        prompt: 'Explain the fundamental principles and concepts in this document step-by-step for a beginner.'
-    },
-    {
-        title: 'Generate exam practice',
-        icon: '🎯',
-        prompt: 'Generate 5 high-yield exam practice questions based on this material, with answers and explanations.'
-    },
-    {
-        title: 'Key terms & definitions',
-        icon: '⚡',
-        prompt: 'Extract the most important technical terms, definitions, and formulas found in this document.'
-    }
-]
-
 const StudyHome = () => {
     const navigate = useNavigate()
     const {
@@ -96,15 +73,6 @@ const StudyHome = () => {
         if (diffHours < 24) return `${diffHours}h ago`
         const diffDays = Math.round(diffHours / 24)
         return `${diffDays}d ago`
-    }
-
-    const handleQuickAction = (prompt) => {
-        if (sortedDocuments.length > 0) {
-            const targetDoc = sortedDocuments[0]
-            navigate(`/study/${targetDoc._id}?q=${encodeURIComponent(prompt)}`)
-        } else {
-            setIsUploadOpen(true)
-        }
     }
 
     return (
@@ -178,30 +146,7 @@ const StudyHome = () => {
                     </div>
                 </section>
 
-                {/* 2. Quick Actions (Shown when user has at least 1 document) */}
-                {documents.length > 0 && (
-                    <section className='study-quick-actions'>
-                        <div className='study-quick-actions__label'>
-                            <span>What do you want to do?</span>
-                        </div>
-                        <div className='study-quick-actions__grid'>
-                            {QUICK_ACTIONS.map((action, idx) => (
-                                <button
-                                    key={idx}
-                                    type='button'
-                                    className='study-quick-action-pill'
-                                    onClick={() => handleQuickAction(action.prompt)}
-                                    title={`Ask on ${sortedDocuments[0]?.originalFileName || 'document'}`}
-                                >
-                                    <span className='action-icon'>{action.icon}</span>
-                                    <span className='action-text'>{action.title}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* 3. Search + Filter + Sort Toolbar */}
+                {/* 2. Search + Filter + Sort Toolbar */}
                 <div className='study-toolbar'>
                     <div className='study-toolbar__search'>
                         <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
