@@ -141,7 +141,7 @@ async function updateDsaProgressController(req, res) {
     }
 
     const updatedUser = await userModel.findByIdAndUpdate(req.user.id, update, {
-        new: true,
+        returnDocument: "after",
         runValidators: true
     }).select("dsaProgress")
 
@@ -182,7 +182,7 @@ async function saveDsaNoteController(req, res) {
     }
 
     await userModel.findByIdAndUpdate(req.user.id, update, {
-        new: true,
+        returnDocument: "after",
         runValidators: true
     })
 

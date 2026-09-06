@@ -6,8 +6,10 @@ import AppHeader from '../components/AppHeader.jsx'
 
 const Home = () => {
 
-    const { loading, generateReport,reports } = useInterview()
+    const { loading, generateReport, reports, deleteReport, clearAllReports } = useInterview()
     const safeReports = Array.isArray(reports) ? reports : []
+    const [ isDeletingId, setIsDeletingId ] = useState(null)
+    const [ showAllReports, setShowAllReports ] = useState(false)
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ resumeFileName, setResumeFileName ] = useState("")
@@ -37,6 +39,32 @@ const Home = () => {
             setFormError("Could not generate the interview plan. Please make sure you are logged in and try again.")
         }
     }
+
+    const handleDeleteReport = async (e, reportId) => {
+        e.stopPropagation()
+        if (window.confirm("Are you sure you want to remove this interview plan?")) {
+            setIsDeletingId(reportId)
+            try {
+                await deleteReport(reportId)
+            } catch (err) {
+                alert("Failed to delete interview report. Please restart your backend server so the latest delete endpoints are active.")
+            } finally {
+                setIsDeletingId(null)
+            }
+        }
+    }
+
+    const handleClearAllReports = async () => {
+        if (window.confirm("Are you sure you want to remove all previous interview plans? This action cannot be undone.")) {
+            try {
+                await clearAllReports()
+            } catch (err) {
+                alert("Failed to clear interview reports. Please restart your backend server so the latest delete endpoints are active.")
+            }
+        }
+    }
+
+    const displayedReports = showAllReports ? safeReports : safeReports.slice(0, 6)
 
     if (loading) {
         return (
@@ -157,13 +185,70 @@ const Home = () => {
             {/* Recent Reports List */}
             {safeReports.length > 0 && (
                 <section className='recent-reports'>
-                    <h2>My Recent Interview Plans</h2>
+                    <div className='recent-reports__header'>
+                        <div className='recent-reports__title-wrap'>
+                            <h2>My Recent Interview Plans</h2>
+                            <span className='reports-count-badge'>{safeReports.length}</span>
+                        </div>
+                        <div className='recent-reports__actions'>
+                            {safeReports.length > 6 && (
+                                <button
+                                    type='button'
+                                    className='reports-toggle-btn'
+                                    onClick={() => setShowAllReports(prev => !prev)}
+                                >
+                                    {showAllReports ? "Show Less" : `Show All (${safeReports.length})`}
+                                </button>
+                            )}
+                            <button
+                                type='button'
+                                className='reports-clear-btn'
+                                onClick={handleClearAllReports}
+                                title='Remove all previous interview plans'
+                            >
+                                <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                                    <polyline points='3 6 5 6 21 6' />
+                                    <path d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' />
+                                </svg>
+                                <span>Clear All</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <ul className='reports-list'>
-                        {safeReports.map(report => (
-                            <li key={report._id} className='report-item' onClick={() => navigate(`/interview/${report._id}`)}>
-                                <h3>{report.title || 'Untitled Position'}</h3>
+                        {displayedReports.map(report => (
+                            <li
+                                key={report._id}
+                                className={`report-item ${isDeletingId === report._id ? 'is-deleting' : ''}`}
+                                onClick={() => navigate(`/interview/${report._id}`)}
+                            >
+                                <div className='report-item__top'>
+                                    <h3 title={report.title || 'Untitled Position'}>
+                                        {report.title || 'Untitled Position'}
+                                    </h3>
+                                    <button
+                                        type='button'
+                                        className='report-item__delete-btn'
+                                        onClick={(e) => handleDeleteReport(e, report._id)}
+                                        title='Delete this interview plan'
+                                        aria-label='Delete this plan'
+                                        disabled={isDeletingId === report._id}
+                                    >
+                                        <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                                            <polyline points='3 6 5 6 21 6' />
+                                            <path d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' />
+                                            <line x1='10' y1='11' x2='10' y2='17' />
+                                            <line x1='14' y1='11' x2='14' y2='17' />
+                                        </svg>
+                                    </button>
+                                </div>
                                 <p className='report-meta'>Generated on {new Date(report.createdAt).toLocaleDateString()}</p>
-                                <p className={`match-score ${report.matchScore >= 80 ? 'score--high' : report.matchScore >= 60 ? 'score--mid' : 'score--low'}`}>Match Score: {report.matchScore}%</p>
+                                <div className='report-item__bottom'>
+                                    <p className={`match-score ${report.matchScore >= 80 ? 'score--high' : report.matchScore >= 60 ? 'score--mid' : 'score--low'}`}>
+                                        Match Score: {report.matchScore}%
+                                    </p>
+                                    <span className='report-item__view-hint'>View Plan →</span>
+                                </div>
                             </li>
                         ))}
                     </ul>

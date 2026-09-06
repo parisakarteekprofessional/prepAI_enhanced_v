@@ -1,4 +1,4 @@
-import { getAllInterviewReports, generateInterviewReport, getInterviewReportById, generateResumePdf } from "../services/interview.api"
+import { getAllInterviewReports, generateInterviewReport, getInterviewReportById, generateResumePdf, deleteInterviewReport, clearAllInterviewReports } from "../services/interview.api"
 import { useContext, useEffect } from "react"
 import { InterviewContext } from "../interview.context"
 import { useParams } from "react-router"
@@ -81,6 +81,44 @@ export const useInterview = () => {
         }
     }
 
+    const deleteReport = async (interviewReportId) => {
+        const previousReports = reports
+        // Optimistic UI update: immediately remove from UI
+        setReports((prev) => (Array.isArray(prev) ? prev.filter((r) => r._id !== interviewReportId) : []))
+        if (report?._id === interviewReportId) {
+            setReport(null)
+        }
+
+        try {
+            await deleteInterviewReport(interviewReportId)
+            return true
+        } catch (error) {
+            console.error("Failed to delete interview report:", error)
+            // Rollback optimistic update
+            setReports(previousReports)
+            throw error
+        }
+    }
+
+    const clearAllReports = async () => {
+        const previousReports = reports
+        // Optimistic UI update: immediately clear from UI
+        setReports([])
+        if (report) {
+            setReport(null)
+        }
+
+        try {
+            await clearAllInterviewReports()
+            return true
+        } catch (error) {
+            console.error("Failed to clear interview reports:", error)
+            // Rollback optimistic update
+            setReports(previousReports)
+            throw error
+        }
+    }
+
     useEffect(() => {
         if (interviewId) {
             getReportById(interviewId)
@@ -89,6 +127,6 @@ export const useInterview = () => {
         }
     }, [ interviewId ])
 
-    return { loading, report, reports, generateReport, getReportById, getReports, getResumePdf }
+    return { loading, report, reports, generateReport, getReportById, getReports, getResumePdf, deleteReport, clearAllReports }
 
 }
