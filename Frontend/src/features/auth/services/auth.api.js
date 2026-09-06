@@ -2,9 +2,9 @@ import axios from "axios"
 
 
 const api = axios.create({
-    baseURL: "/",
-    withCredentials: true
-})
+  baseURL: "http://localhost:3000",
+  withCredentials: true,
+});
 
 export async function register({ username, email, password }) {
     const response = await api.post('/api/auth/register', {
@@ -31,7 +31,7 @@ export async function logout() {
 
         return response.data
 
-    } catch (err) {
+    } catch{
 
     }
 }

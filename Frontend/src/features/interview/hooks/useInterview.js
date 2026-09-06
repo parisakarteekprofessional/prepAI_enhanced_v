@@ -50,10 +50,12 @@ export const useInterview = () => {
         let response = null
         try {
             response = await getAllInterviewReports()
-            setReports(response.interviewReports)
-            return response.interviewReports
+            const nextReports = Array.isArray(response?.interviewReports) ? response.interviewReports : []
+            setReports(nextReports)
+            return nextReports
         } catch (error) {
             console.log(error)
+            setReports([])
             return []
         } finally {
             setLoading(false)

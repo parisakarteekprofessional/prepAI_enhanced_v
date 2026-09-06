@@ -1,0 +1,704 @@
+// ── DSA Base Variables & Theme ──────────────────────────────────────────────
+$bg-page:        #0f1420;
+$bg-card:        #141a26;
+$bg-panel:       #1a2232;
+$bg-input:       #161e2e;
+$border-color:   #283449;
+$border-subtle:  #1f2838;
+$text-primary:   #f5f7fb;
+$text-muted:     #98a4b8;
+$text-dim:       #6e7b91;
+$accent-pink:    #ff2d78;
+$accent-blue:    #54c6ff;
+$accent-coral:   #ff6f3c;
+$accent-green:   #58d68d;
+$accent-amber:   #f4c95d;
+$accent-purple:  #a29bfe;
+$font-stack:     'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+
+// ── Page Layout ─────────────────────────────────────────────────────────────
+.dsa-page {
+    width: 100%;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, rgba(255, 45, 120, 0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(84, 198, 255, 0.14), transparent 26%),
+        linear-gradient(180deg, #111827 0%, $bg-page 45%, #090c12 100%);
+    color: $text-primary;
+    font-family: $font-stack;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem;
+    gap: 1.25rem;
+}
+
+.dsa-main {
+    width: 100%;
+    max-width: 1480px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 0 0.5rem 3rem 0.5rem;
+}
+
+.highlight-blue {
+    color: $accent-blue;
+}
+
+// ── Hero Header ─────────────────────────────────────────────────────────────
+.dsa-hero-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem 0 0.25rem 0;
+
+    &__title {
+        font-size: clamp(2rem, 3.2vw, 2.75rem);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+
+    &__subtitle {
+        color: $text-muted;
+        font-size: 1.05rem;
+        max-width: 780px;
+        line-height: 1.55;
+    }
+}
+
+.dsa-eyebrow-tag {
+    width: fit-content;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    background: rgba($accent-blue, 0.1);
+    border: 1px solid rgba($accent-blue, 0.28);
+    color: #bceeff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+// ── Contextual Navigation (DsaNav) ──────────────────────────────────────────
+.dsa-nav {
+    width: 100%;
+    max-width: 1480px;
+
+    &__container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0.4rem;
+        border-radius: 0.75rem;
+        background: rgba($bg-card, 0.85);
+        border: 1px solid rgba($border-color, 0.8);
+        backdrop-filter: blur(12px);
+    }
+
+    &__links {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+
+    &__link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 0.95rem;
+        border-radius: 0.55rem;
+        color: $text-muted;
+        text-decoration: none;
+        font-size: 0.86rem;
+        font-weight: 600;
+        transition: background 0.15s ease, color 0.15s ease;
+
+        &:hover {
+            color: $text-primary;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        &.is-active {
+            color: #fff;
+            background: linear-gradient(135deg, rgba($accent-pink, 0.25) 0%, rgba($accent-blue, 0.25) 100%);
+            border: 1px solid rgba($accent-blue, 0.35);
+            font-weight: 700;
+        }
+    }
+
+    &__pill {
+        padding: 0.15rem 0.45rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #d1d9e6;
+    }
+}
+
+// ── Two Major Primary Cards ─────────────────────────────────────────────────
+.dsa-sheets-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+
+    @media (max-width: 860px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dsa-sheet-card {
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid rgba($border-color, 0.9);
+    background: rgba($bg-card, 0.9);
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    &--normal {
+        background:
+            radial-gradient(circle at top right, rgba($accent-pink, 0.14), transparent 45%),
+            rgba($bg-card, 0.95);
+        border-color: rgba($accent-pink, 0.3);
+
+        &:hover {
+            border-color: rgba($accent-pink, 0.55);
+        }
+    }
+
+    &--company {
+        background:
+            radial-gradient(circle at top right, rgba($accent-blue, 0.15), transparent 45%),
+            rgba($bg-card, 0.95);
+        border-color: rgba($accent-blue, 0.3);
+
+        &:hover {
+            border-color: rgba($accent-blue, 0.55);
+        }
+    }
+
+    &__badge {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: $text-muted;
+    }
+
+    &__title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: $text-primary;
+    }
+
+    &__desc {
+        color: $text-muted;
+        font-size: 0.88rem;
+        line-height: 1.55;
+        min-height: 2.7rem;
+    }
+
+    &__metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin: 0.5rem 0;
+    }
+
+    &__footer {
+        margin-top: auto;
+        padding-top: 0.5rem;
+    }
+}
+
+.dsa-metric-box {
+    padding: 0.75rem 0.85rem;
+    border-radius: 0.65rem;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba($border-color, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    strong {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: $text-primary;
+    }
+
+    span {
+        font-size: 0.72rem;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+}
+
+.dsa-sheet-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    border-radius: 0.65rem;
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+        opacity: 0.94;
+        transform: translateY(-1px);
+    }
+
+    &--primary {
+        background: linear-gradient(135deg, $accent-pink 0%, #d81559 100%);
+        color: #ffffff;
+        box-shadow: 0 8px 24px rgba($accent-pink, 0.25);
+    }
+
+    &--secondary {
+        background: linear-gradient(135deg, $accent-blue 0%, #2087ff 100%);
+        color: #081628;
+        box-shadow: 0 8px 24px rgba($accent-blue, 0.25);
+    }
+}
+
+// ── Progress & Stats Card ───────────────────────────────────────────────────
+.dsa-stats-card {
+    padding: 1.4rem;
+    border-radius: 0.9rem;
+    border: 1px solid rgba($border-color, 0.9);
+    background: rgba($bg-card, 0.92);
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    &__eyebrow {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: $text-muted;
+    }
+
+    &__title {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: $text-primary;
+        margin-top: 0.2rem;
+    }
+
+    &__muted {
+        color: $text-muted;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    &__pct-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+
+        span {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: $accent-blue;
+            line-height: 1;
+        }
+
+        small {
+            font-size: 0.72rem;
+            color: $text-muted;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    }
+
+    &__breakdown {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+    }
+}
+
+.dsa-stat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba($border-color, 0.8);
+    font-size: 0.82rem;
+
+    &__dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    &__label {
+        color: $text-muted;
+    }
+
+    &__value {
+        font-weight: 700;
+        color: $text-primary;
+
+        small {
+            color: $text-muted;
+            font-weight: 500;
+        }
+    }
+
+    &--easy {
+        .dsa-stat-pill__dot { background: $accent-green; }
+    }
+
+    &--medium {
+        .dsa-stat-pill__dot { background: $accent-amber; }
+    }
+
+    &--hard {
+        .dsa-stat-pill__dot { background: #ff6b6b; }
+    }
+
+    &--attempted {
+        .dsa-stat-pill__dot { background: $accent-blue; }
+    }
+}
+
+// ── Progress Bar ────────────────────────────────────────────────────────────
+.dsa-progress-bar {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    &__track {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    &__fill {
+        height: 100%;
+        background: linear-gradient(90deg, $accent-pink 0%, $accent-blue 100%);
+        border-radius: 999px;
+        transition: width 0.35s ease-out;
+    }
+
+    &--sm {
+        .dsa-progress-bar__track { height: 5px; }
+    }
+
+    &--md {
+        .dsa-progress-bar__track { height: 7px; }
+    }
+
+    &--lg {
+        .dsa-progress-bar__track { height: 10px; }
+    }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        color: $text-muted;
+    }
+
+    &__value {
+        font-weight: 700;
+        color: $text-primary;
+    }
+
+    &__divider {
+        color: $text-dim;
+    }
+
+    &__pct {
+        font-weight: 600;
+        color: $accent-blue;
+    }
+}
+
+// ── Badges ──────────────────────────────────────────────────────────────────
+.dsa-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1;
+
+    &--sm {
+        padding: 0.18rem 0.5rem;
+        font-size: 0.7rem;
+    }
+
+    &--normal {
+        padding: 0.3rem 0.75rem;
+        font-size: 0.78rem;
+    }
+
+    &--easy {
+        background: rgba($accent-green, 0.12);
+        color: #8ff0b4;
+        border: 1px solid rgba($accent-green, 0.3);
+    }
+
+    &--medium {
+        background: rgba($accent-amber, 0.14);
+        color: #ffe08a;
+        border: 1px solid rgba($accent-amber, 0.35);
+    }
+
+    &--hard {
+        background: rgba(#ff6b6b, 0.14);
+        color: #ffaaaa;
+        border: 1px solid rgba(#ff6b6b, 0.35);
+    }
+}
+
+// ── Status Badge ────────────────────────────────────────────────────────────
+.dsa-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    padding: 0.32rem 0.65rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: default;
+    background: transparent;
+    color: $text-muted;
+    white-space: nowrap;
+
+    &.is-clickable {
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+        }
+    }
+
+    &--sm {
+        padding: 0.25rem 0.55rem;
+        font-size: 0.72rem;
+    }
+
+    &--not-started {
+        background: rgba(255, 255, 255, 0.035);
+        border-color: rgba($border-color, 0.8);
+        color: $text-muted;
+
+        &:hover.is-clickable {
+            border-color: rgba($accent-blue, 0.5);
+            background: rgba($accent-blue, 0.08);
+            color: $accent-blue;
+        }
+    }
+
+    &--attempted {
+        background: rgba($accent-amber, 0.12);
+        border-color: rgba($accent-amber, 0.35);
+        color: #ffd875;
+
+        &:hover.is-clickable {
+            background: rgba($accent-amber, 0.2);
+        }
+    }
+
+    &--solved {
+        background: rgba($accent-green, 0.12);
+        border-color: rgba($accent-green, 0.38);
+        color: #8ef0b4;
+
+        &:hover.is-clickable {
+            background: rgba($accent-green, 0.2);
+        }
+    }
+
+    &__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+// ── Continue Practicing Card ────────────────────────────────────────────────
+.dsa-continue-card {
+    padding: 1.4rem;
+    border-radius: 0.9rem;
+    border: 1px solid rgba($accent-blue, 0.3);
+    background:
+        radial-gradient(circle at top left, rgba($accent-blue, 0.12), transparent 45%),
+        rgba($bg-card, 0.94);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    &__eyebrow {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: $accent-blue;
+    }
+
+    &__hint {
+        color: $text-dim;
+        font-size: 0.8rem;
+    }
+
+    &__body {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    &__info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+
+    &__title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    &__title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $text-primary;
+    }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+}
+
+.dsa-meta-tag {
+    font-size: 0.76rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 0.4rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba($border-color, 0.7);
+    color: $text-muted;
+
+    &--company {
+        color: #d1e8ff;
+        border-color: rgba($accent-blue, 0.3);
+        background: rgba($accent-blue, 0.08);
+    }
+}
+
+// ── Generic Buttons ─────────────────────────────────────────────────────────
+.dsa-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 1.15rem;
+    border-radius: 0.55rem;
+    border: none;
+    background: linear-gradient(135deg, $accent-blue 0%, #2087ff 100%);
+    color: #071524;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+    }
+}
+
+.dsa-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 1.15rem;
+    border-radius: 0.55rem;
+    border: 1px solid rgba($border-color, 0.9);
+    background: rgba(255, 255, 255, 0.04);
+    color: $text-primary;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+        border-color: rgba($accent-blue, 0.5);
+        background: rgba($accent-blue, 0.08);
+    }
+}
+
+.dsa-empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    border-radius: 0.85rem;
+    border: 1px dashed rgba($border-color, 0.9);
+    background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+
+    p {
+        color: $text-muted;
+        font-size: 0.95rem;
+    }
+}

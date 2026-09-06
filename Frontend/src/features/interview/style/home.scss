@@ -1,26 +1,29 @@
 // ── Variables ────────────────────────────────────────────────────────────────
-$bg-page:        #0d1117;
-$bg-card:        #161b22;
+$bg-page:        #0f1420;
+$bg-card:        #141a26;
 $bg-panel:       #1c2230;
 $bg-input:       #1e2535;
 $border-color:   #2a3348;
 $text-primary:   #e6edf3;
-$text-muted:     #7d8590;
-$accent:         #ff2d78;
-$accent-dark:    #d71660;
+$text-muted:     #94a0b4;
+$accent:         #ff6f3c;
+$accent-dark:    #d75028;
 $accent-blue:    #54c6ff;
-$accent-alt:     #ff6b9d;
+$accent-alt:     #f4c95d;
 $badge-required: #ff2d78;
 $badge-best:     #ff2d78;
 $info-bg:        #1b2a4a;
 $info-border:    #2d4a7a;
-$font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-stack:     'Segoe UI', 'Inter', system-ui, sans-serif;
 
 // ── Page Shell ───────────────────────────────────────────────────────────────
 .home-page {
     width: 100%;
     min-height: 100vh;
-    background: linear-gradient(180deg, #111827 0%, $bg-page 48%, #090c12 100%);
+    background:
+        radial-gradient(circle at top left, rgba(255, 111, 60, 0.2), transparent 24%),
+        radial-gradient(circle at top right, rgba(84, 198, 255, 0.16), transparent 22%),
+        linear-gradient(180deg, #111827 0%, $bg-page 48%, #090c12 100%);
     color: $text-primary;
     font-family: $font-stack;
 
@@ -71,6 +74,10 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
 
     .highlight {
         color: #ff70a8;
+    }
+
+    &--interview {
+        margin-top: 1rem;
     }
 }
 
@@ -411,6 +418,35 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     .page-header {
         h1 {
             font-size: 2rem;
+        }
+    }
+
+    .dsa-hero {
+        grid-template-columns: 1fr;
+
+        &__stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .dsa-launcher {
+        grid-template-columns: 1fr;
+
+        &__actions {
+            align-items: stretch;
+        }
+
+        &__hint {
+            max-width: none;
+            text-align: left;
+        }
+    }
+
+    .dsa-toolbar {
+        align-items: stretch;
+
+        &__filters {
+            width: 100%;
         }
     }
 

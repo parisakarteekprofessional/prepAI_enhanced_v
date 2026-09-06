@@ -44,7 +44,7 @@ export const useAuth = () => {
             const data = await logout()
             setUser(null)
         } catch (err) {
-
+            
         } finally {
             setLoading(false)
         }

@@ -8,7 +8,7 @@ const tokenBlacklistModel = require("../models/blacklist.model")
  * @description register a new user, expects username, email and password in the request body
  * @access Public
  */
-async function registerUserController(req, res) {
+async function registerUserController(req, res) { 
 
     const { username, email, password } = req.body
 
@@ -50,7 +50,11 @@ async function registerUserController(req, res) {
         user: {
             id: user._id,
             username: user.username,
-            email: user.email
+            email: user.email,
+            dsaProgress: {
+                solvedQuestionIds: user.dsaProgress?.solvedQuestionIds || [],
+                lastSolvedAt: user.dsaProgress?.lastSolvedAt || null
+            }
         }
     })
 
@@ -94,7 +98,11 @@ async function loginUserController(req, res) {
         user: {
             id: user._id,
             username: user.username,
-            email: user.email
+            email: user.email,
+            dsaProgress: {
+                solvedQuestionIds: user.dsaProgress?.solvedQuestionIds || [],
+                lastSolvedAt: user.dsaProgress?.lastSolvedAt || null
+            }
         }
     })
 }
@@ -135,7 +143,11 @@ async function getMeController(req, res) {
         user: {
             id: user._id,
             username: user.username,
-            email: user.email
+            email: user.email,
+            dsaProgress: {
+                solvedQuestionIds: user.dsaProgress?.solvedQuestionIds || [],
+                lastSolvedAt: user.dsaProgress?.lastSolvedAt || null
+            }
         }
     })
 

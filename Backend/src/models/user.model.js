@@ -17,6 +17,26 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+
+    dsaProgress: {
+        solvedQuestionIds: {
+            type: [ String ],
+            default: []
+        },
+        attemptedQuestionIds: {
+            type: [ String ],
+            default: []
+        },
+        notes: {
+            type: Map,
+            of: String,
+            default: {}
+        },
+        lastSolvedAt: {
+            type: Date,
+            default: null
+        }
     }
 })
 
