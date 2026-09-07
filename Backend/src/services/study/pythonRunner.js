@@ -62,9 +62,9 @@ async function ensureRagEngineRunning() {
             startPromise = null
         })
 
-        // Poll until ready (up to 40 seconds for model loading)
+        // Poll until ready (up to 60 seconds for model loading)
         const startTime = Date.now()
-        while (Date.now() - startTime < 40000) {
+        while (Date.now() - startTime < 60000) {
             await new Promise((resolve) => setTimeout(resolve, 1000))
             const ok = await checkHealth()
             if (ok) {
@@ -73,7 +73,7 @@ async function ensureRagEngineRunning() {
             }
         }
 
-        throw new Error("Local RAG Engine failed to start within 40 seconds.")
+        throw new Error("Local RAG Engine failed to start within 60 seconds.")
     })()
 
     try {
@@ -82,6 +82,29 @@ async function ensureRagEngineRunning() {
         startPromise = null
     }
 }
+
+function cleanupPythonProcess() {
+    if (pythonProcess && !pythonProcess.killed) {
+        try {
+            if (process.platform === "win32") {
+                spawn("taskkill", ["/pid", String(pythonProcess.pid), "/f", "/t"])
+            } else {
+                pythonProcess.kill("SIGTERM")
+            }
+        } catch {}
+        pythonProcess = null
+    }
+}
+
+process.on("exit", cleanupPythonProcess)
+process.on("SIGINT", () => {
+    cleanupPythonProcess()
+    process.exit()
+})
+process.on("SIGTERM", () => {
+    cleanupPythonProcess()
+    process.exit()
+})
 
 module.exports = {
     RAG_URL,

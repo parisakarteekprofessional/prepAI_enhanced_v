@@ -33,12 +33,24 @@ const MockInterviewRoom = () => {
         finishInterview,
     } = useMockInterview();
 
-    const { videoRef, isCameraOn, toggleCamera, startCamera, error: cameraError } = useWebcam();
+    const { videoRef, attachVideoRef, stream, isCameraOn, toggleCamera, startCamera, error: cameraError } = useWebcam();
 
     // Auto-start camera on component mount
     useEffect(() => {
         startCamera();
     }, [startCamera]);
+
+    // Ensure candidate webcam stream is attached whenever session loads or stream becomes ready
+    useEffect(() => {
+        if (videoRef.current && stream) {
+            if (videoRef.current.srcObject !== stream) {
+                videoRef.current.srcObject = stream;
+            }
+            videoRef.current.play().catch((err) => {
+                console.warn("[MockInterviewRoom] video play error:", err);
+            });
+        }
+    }, [stream, session, isCameraOn]);
     const {
         isListening,
         transcript,
@@ -429,7 +441,17 @@ const MockInterviewRoom = () => {
                         {/* Video / Webcam Preview with Overlay Action Buttons */}
                         <div className="video-viewport-wrap">
                             <video
-                                ref={videoRef}
+                                ref={(node) => {
+                                    if (attachVideoRef) {
+                                        attachVideoRef(node);
+                                    } else {
+                                        videoRef.current = node;
+                                    }
+                                    if (node && stream && node.srcObject !== stream) {
+                                        node.srcObject = stream;
+                                        node.play().catch(() => {});
+                                    }
+                                }}
                                 autoPlay
                                 playsInline
                                 muted
